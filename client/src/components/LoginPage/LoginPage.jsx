@@ -2,10 +2,48 @@ import React, { useState } from "react";
 import "./LoginPage.css";
 import GoogleLogin from "react-google-login";
 import Navbar from "../Navbar/Navbar";
-//import { useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 export default function Login() {
   const [name, setName] = useState("");
+  const history=useHistory();
+  const [user,setUser]=useState(
+      {
+          email:"",password:""
+      }
+  );
+
+let name,value;
+const handleInputs =(e)=>{
+console.log(e);
+name=e.target.name;
+value=e.target.value;
+setUser({...user,[name]:value});
+}
+
+const PostData=async (e)=>{
+  e.preventDefault();
+  const{email,password}=user;
+  const res=await fetch("/login",{
+      method:"POST",
+      headers:{
+          "Content-type":"application/json"
+      },
+      body:JSON.stringify({
+          email,password
+      })
+  });
+  const data=await res.json();
+  if(data.status===422 || !data ){
+      window.alert("Invalid Registration");
+  }
+  else{
+      console.log("Succesful registration");
+      window.open(
+        `https://0wwr9.csb.app/welcome?name=${data.name}`,
+        "_self"
+      );
+  }
   const failedresponseGoogle = (respose) => {
     console.log(respose);
   };
@@ -17,6 +55,9 @@ export default function Login() {
       "_self"
     );
   };
+  const switchTosignup=()=>{
+    history.push('/Signup');
+  }
   return (
     <>
     <Navbar />
@@ -25,31 +66,34 @@ export default function Login() {
       <div className="right column">
         <div className="header">
           <h1>SIGN IN</h1>
-          <h3>Don't have an account?Sign Up</h3>
+          <h3>Don't have an account?<a onClick={switchTosignup}>Sign Up</a></h3>
         </div>
         <div className="form">
           <div className="form-group">
             <label htmlFor="email">
               <h3>Email Address</h3>
             </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-            ></input>
+            <input type="text" name="email" id="email" autoComplete="off"
+                                value={user.email}
+                                onChange={handleInputs}
+
+                                placeholder="Your Email"/>
           </div>
           <div className="form-group">
             <label htmlFor="password">
               <h3>Password</h3>
             </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter 6 characters or more"
-            ></input>
+            <input type="password" name="password" id="password" autoComplete="off"
+                                value={user.password}
+                                onChange={handleInputs}
+                                    placeholder="Your Password"/>
           </div>
           <div className="footer">
-            <button>LOGIN</button>
+          <div className="form-group form-button">
+          <input type="submit" name="signin" id="signin" className="form-submit"
+          onClick={PostData}
+              value="Log In"/>
+      </div>
             <div class="border">
               <hr></hr>OR<hr></hr>
             </div>
